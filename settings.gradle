@@ -1,0 +1,2 @@
+include ':app'
+rootProject.name = "Android-Docs-Sample-Code-SDK-3"

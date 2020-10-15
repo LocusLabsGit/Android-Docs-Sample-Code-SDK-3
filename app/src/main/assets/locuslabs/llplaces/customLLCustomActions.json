@@ -1,0 +1,14 @@
+{
+  "places": [
+    {
+      "behavior": "search",
+      "value": "chocolate",
+      "name": "Chocolate",
+      "icon": "ll_places_icon_coffee.png",
+      "mapMarker": "",
+      "normalColor": "290d0a",
+      "normalIconColor": "ffffff",
+      "cornerRadiusPercent": 1
+    }
+  ]
+}
