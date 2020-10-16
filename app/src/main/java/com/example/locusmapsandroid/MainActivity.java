@@ -10,9 +10,16 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.locuslabs.sdk.llprotected.LLOnGetVenueListCallback;
+import com.locuslabs.sdk.llprotected.LLVenueDatabase;
+import com.locuslabs.sdk.llprotected.LLVenueFiles;
+import com.locuslabs.sdk.llprotected.LLVenueList;
+import com.locuslabs.sdk.llprotected.LLVenueListEntry;
 import com.locuslabs.sdk.llpublic.LLDependencyInjector;
 import com.locuslabs.sdk.llpublic.LLLocusMapsFragment;
 import com.locuslabs.sdk.llpublic.LLOnFailureListener;
@@ -22,9 +29,7 @@ import com.locuslabs.sdk.llpublic.LLOnProgressListener;
 
 import java.util.Calendar;
 
-import static com.example.locusmapsandroid.MyConstants.VENUE_LAX_ASSET_VERSION;
 import static com.example.locusmapsandroid.MyConstants.VENUE_LAX_ID;
-import static com.example.locusmapsandroid.MyConstants.VENUE_LAX_VENUE_FILES;
 import static com.example.locusmapsandroid.MyConstants.logTag;
 import static com.locuslabs.sdk.llprivate.ConstantsKt.FRACTION_TO_PERCENT_CONVERSION_RATIO;
 import static com.locuslabs.sdk.llprivate.ConstantsKt.PROGRESS_BAR_FRACTION_FINISH;
@@ -55,7 +60,27 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        llLocusMapsFragment.loadVenue(VENUE_LAX_ID, VENUE_LAX_ASSET_VERSION, VENUE_LAX_VENUE_FILES);
+        LLVenueDatabase llVenueDatabase = new LLVenueDatabase();
+        llVenueDatabase.getVenueList(new LLOnGetVenueListCallback() {
+            @Override
+            public void successCallback(@NonNull LLVenueList llVenueList) {
+                String llVenueID = VENUE_LAX_ID;
+
+                LLVenueListEntry llVenueListEntry = llVenueList.get(llVenueID);
+
+                String llVenueAssetVersion = llVenueListEntry.getAssetVersion();
+                LLVenueFiles llVenueFiles = llVenueListEntry.getFiles();
+
+                llLocusMapsFragment.loadVenue(llVenueID, llVenueAssetVersion, llVenueFiles);
+            }
+
+            @Override
+            public void failureCallback(@NonNull Throwable throwable) {
+                Toast.makeText(getApplicationContext(), "Failed to get venue list because |" + Log.getStackTraceString(throwable) + "|", Toast.LENGTH_LONG).show();
+                Log.e(logTag, "Failed to get venue list because stack trace: " + Log.getStackTraceString(throwable));
+                Log.e(logTag, "Failed to get venue list because stack trace cause: " + Log.getStackTraceString(throwable.getCause()));
+            }
+        });
     }
 
     private void initViewIDs() {
@@ -73,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
         LLDependencyInjector.Companion.getSingleton().setOnInitializationProgressListener(
                 new LLOnProgressListener() {
                     @Override
-                    public void onProgressUpdate(double fractionComplete, String progressDescription) {
+                    public void onProgressUpdate(double fractionComplete, @NonNull String progressDescription) {
                         if (PROGRESS_BAR_FRACTION_FINISH == fractionComplete) {
                             hideInitializationProgressIndicator();
                         }
@@ -84,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
         LLDependencyInjector.Companion.getSingleton().setOnLevelLoadingProgressListener(
                 new LLOnProgressListener() {
                     @Override
-                    public void onProgressUpdate(double fractionComplete, String progressDescription) {
+                    public void onProgressUpdate(double fractionComplete, @NonNull String progressDescription) {
                         updateLevelLoadingProgressIndicator(fractionComplete, progressDescription);
                     }
                 }
@@ -93,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
         LLDependencyInjector.Companion.getSingleton().setOnPOIURLClickedListener(
                 new LLOnPOIURLClickedListener() {
                     @Override
-                    public void onPOIURLClicked(String url) {
+                    public void onPOIURLClicked(@NonNull String url) {
                         Intent intent = new Intent(Intent.ACTION_VIEW);
                         intent.setData(Uri.parse(url));
                         startActivity(intent);
@@ -104,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
         LLDependencyInjector.Companion.getSingleton().setOnPOIPhoneClickedListener(
                 new LLOnPOIPhoneClickedListener() {
                     @Override
-                    public void onPOIPhoneClicked(String phone) {
+                    public void onPOIPhoneClicked(@NonNull String phone) {
                         Intent intent = new Intent(Intent.ACTION_DIAL);
                         intent.setData(Uri.parse(phone));
                         startActivity(intent);
@@ -114,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
 
         LLDependencyInjector.Companion.getSingleton().setOnFailureListener(new LLOnFailureListener() {
             @Override
-            public void onFailure(Throwable throwable) {
+            public void onFailure(@NonNull Throwable throwable) {
                 Log.e(logTag, "stack trace: " + Log.getStackTraceString(throwable));
                 Log.e(logTag, "stack trace cause: " + Log.getStackTraceString(throwable.getCause()));
             }
