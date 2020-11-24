@@ -22,13 +22,18 @@ import com.locuslabs.sdk.llprotected.LLVenueList;
 import com.locuslabs.sdk.llprotected.LLVenueListEntry;
 import com.locuslabs.sdk.llpublic.LLDependencyInjector;
 import com.locuslabs.sdk.llpublic.LLLocusMapsFragment;
+import com.locuslabs.sdk.llpublic.LLMapPackFinder;
 import com.locuslabs.sdk.llpublic.LLOnFailureListener;
 import com.locuslabs.sdk.llpublic.LLOnPOIPhoneClickedListener;
 import com.locuslabs.sdk.llpublic.LLOnPOIURLClickedListener;
 import com.locuslabs.sdk.llpublic.LLOnProgressListener;
+import com.locuslabs.sdk.llpublic.LLOnUnpackCallback;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
+import static com.example.locusmapsandroid.MyConstants.ACCOUNT_ID_LOCUSLABS_DEMO;
 import static com.example.locusmapsandroid.MyConstants.VENUE_LAX_ID;
 import static com.example.locusmapsandroid.MyConstants.logTag;
 import static com.locuslabs.sdk.llprivate.ConstantsKt.FRACTION_TO_PERCENT_CONVERSION_RATIO;
@@ -60,6 +65,33 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        unpackMapPacksThenLoadVenueListThenShowVenue();
+    }
+
+    private void unpackMapPacksThenLoadVenueListThenShowVenue() {
+        List<String> accountIdsForMapPacks = new ArrayList<String>();
+        accountIdsForMapPacks.add(ACCOUNT_ID_LOCUSLABS_DEMO);
+        for (int i = 0; i < accountIdsForMapPacks.size(); i++) {
+            String accountIdsForMapPack = accountIdsForMapPacks.get(i);
+
+            LLOnUnpackCallback callback = new LLOnUnpackCallback() {
+                @Override
+                public void onUnpack(boolean b, Throwable throwable) {
+                    if (throwable != null) {
+                        Log.e(logTag, "MapPack installation failed because: " +
+                                throwable.getMessage());
+                    } else {
+                        loadVenueListThenShowVenue();
+                    }
+                }
+            };
+
+            LLMapPackFinder.Companion.installMapPack(accountIdsForMapPack, null, callback);
+        }
+    }
+
+    private void loadVenueListThenShowVenue() {
         LLVenueDatabase llVenueDatabase = new LLVenueDatabase();
         llVenueDatabase.getVenueList(new LLOnGetVenueListCallback() {
             @Override
@@ -68,10 +100,7 @@ public class MainActivity extends AppCompatActivity {
 
                 LLVenueListEntry llVenueListEntry = llVenueList.get(llVenueID);
 
-                String llVenueAssetVersion = llVenueListEntry.getAssetVersion();
-                LLVenueFiles llVenueFiles = llVenueListEntry.getFiles();
-
-                llLocusMapsFragment.loadVenue(llVenueID, llVenueAssetVersion, llVenueFiles);
+                showVenue(llVenueID, llVenueListEntry);
             }
 
             @Override
@@ -81,6 +110,13 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(logTag, "Failed to get venue list because stack trace cause: " + Log.getStackTraceString(throwable.getCause()));
             }
         });
+    }
+
+    private void showVenue(String llVenueID, LLVenueListEntry llVenueListEntry) {
+        String llVenueAssetVersion = llVenueListEntry.getAssetVersion();
+        LLVenueFiles llVenueFiles = llVenueListEntry.getFiles();
+
+        llLocusMapsFragment.loadVenue(llVenueID, llVenueAssetVersion, llVenueFiles);
     }
 
     private void initViewIDs() {
