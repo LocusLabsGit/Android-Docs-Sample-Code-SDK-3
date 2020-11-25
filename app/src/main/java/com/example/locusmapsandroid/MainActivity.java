@@ -15,19 +15,19 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.locuslabs.sdk.llprotected.LLOnGetVenueListCallback;
-import com.locuslabs.sdk.llprotected.LLVenueDatabase;
-import com.locuslabs.sdk.llprotected.LLVenueFiles;
-import com.locuslabs.sdk.llprotected.LLVenueList;
-import com.locuslabs.sdk.llprotected.LLVenueListEntry;
 import com.locuslabs.sdk.llpublic.LLDependencyInjector;
 import com.locuslabs.sdk.llpublic.LLLocusMapsFragment;
 import com.locuslabs.sdk.llpublic.LLMapPackFinder;
 import com.locuslabs.sdk.llpublic.LLOnFailureListener;
+import com.locuslabs.sdk.llpublic.LLOnGetVenueListCallback;
 import com.locuslabs.sdk.llpublic.LLOnPOIPhoneClickedListener;
 import com.locuslabs.sdk.llpublic.LLOnPOIURLClickedListener;
 import com.locuslabs.sdk.llpublic.LLOnProgressListener;
 import com.locuslabs.sdk.llpublic.LLOnUnpackCallback;
+import com.locuslabs.sdk.llpublic.LLVenueDatabase;
+import com.locuslabs.sdk.llpublic.LLVenueFiles;
+import com.locuslabs.sdk.llpublic.LLVenueList;
+import com.locuslabs.sdk.llpublic.LLVenueListEntry;
 
 import java.util.ArrayList;
 import java.util.Calendar;
